@@ -44,7 +44,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def main(context: object = object(), **kwargs) -> None:
     """
-    Inventory loader for GCS. Streams your bucket listing(s) into GCS.
+    Inventory loader for GCS. Streams your bucket listing(s) into BigQuery.
     """
     context.obj = kwargs
 
