@@ -74,19 +74,14 @@ def init(config_file: str = "./default.cfg", log_level: str = None) -> None:
 @click.pass_context
 def load(context: object, buckets: [str] = None, prefix: str = None) -> None:
     """
-    Build the catchup table with all objects in your bucket(s). The table will
-    be named whatever you set to the CATCHUP_TABLE value in the configuration
+    Build the inventory table with all objects in your bucket(s). The table will
+    be named whatever you set to the INVENTORY_TABLE value in the configuration
     file. The table will be created if not found. If it is found, records will
     be appended.
 
     Optionally, you can provide a list of buckets (without gs://) to limit the
     scope. By default, all buckets in the configured project will be processed
     into the table.
-
-    This listing of objects can be UNIONed with the access log by setting the
-    CATCHUP_TABLE value in the configuration file. If an object
-    is only in the catchup table, its create date will be treated as last
-    access. If the object is in the access log, it will be processed as usual.
     """
     init(**context.obj)
     return load_command(buckets, prefix)
