@@ -120,7 +120,8 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
             del metadata["metadata"]
         catchup_output.put(metadata)
 
-    catchup_output.flush()
-    stats[bucket] += blob_count
-    LOG.info("%s blob records written for bucket %s.", stats[bucket],
-             bucket.name)
+    if blob_count:
+        catchup_output.flush()
+        stats[bucket] += blob_count
+        LOG.info("%s blob records written for bucket %s.", stats[bucket],
+                bucket.name)
