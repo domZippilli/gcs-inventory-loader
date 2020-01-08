@@ -17,6 +17,8 @@ Implementation of "catchup" command.
 
 import logging
 from configparser import ConfigParser
+from random import randint
+from time import sleep
 
 from google.cloud.storage import Bucket, Client
 from google.api_core.page_iterator import Page
@@ -67,6 +69,9 @@ def load_command(buckets: [str] = None, prefix: str = None) -> None:
             buckets_listed += 1
             executor.submit(bucket_lister, config, gcs, bucket, prefix,
                             buckets_listed, total_buckets, bucket_blob_counts)
+    
+    LOG.info("Stats: \n\t%s", bucket_blob_counts)
+    LOG.info("Total rows: \n\t%s", sum([v for _, v in bucket_blob_counts.items()]))
 
 
 def bucket_lister(config: ConfigParser, gcs: Client, bucket: Bucket,
@@ -95,6 +100,8 @@ def bucket_lister(config: ConfigParser, gcs: Client, bucket: Bucket,
         blobs = gcs.list_blobs(bucket, prefix=prefix)
         for page in blobs.pages:
             sub_executor.submit(page_outputter, config, bucket, page, stats)
+            sleep(0.02)  # small offset to avoid thundering herd
+            
 
 
 def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
