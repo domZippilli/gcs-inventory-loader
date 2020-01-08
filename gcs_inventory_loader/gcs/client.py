@@ -20,7 +20,10 @@ from threading import Lock
 
 from google.cloud import storage
 
+from gcs_inventory_loader.config import get_config
+
 LOG = logging.getLogger(__name__)
+
 
 class GCSClientPool():
     """
@@ -39,10 +42,15 @@ class GCSClientPool():
         Returns:
             storage.client -- A configured GCS client.
         """
+        config = get_config()
         self.lock.acquire()
         if len(self.clients) < self.pool_size:
             LOG.debug("Making new GCS client.")
-            self.clients.append(storage.Client())
+            self.clients.append(
+                storage.Client(
+                    config.get('GCP',
+                               'GCS_PROJECT',
+                               fallback=config.get('GCP', 'PROJECT'))))
         client = self.clients[self.next_up]
         self.next_up += 1
         if self.next_up >= self.pool_size - 1:
@@ -50,7 +58,9 @@ class GCSClientPool():
         self.lock.release()
         return client
 
+
 CLIENTS = GCSClientPool()
+
 
 def get_gcs_client() -> storage.Client:
     """
