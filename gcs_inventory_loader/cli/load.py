@@ -116,6 +116,8 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
         blob_count += 1
         # pylint: disable=protected-access
         metadata = blob._properties
+        if "metadata" in metadata:  # this field shows up sometimes and isn't needed.
+            del metadata["metadata"]
         catchup_output.put(metadata)
 
     catchup_output.flush()
