@@ -15,7 +15,7 @@
 """
 
 from os import path
-from setuptools import setup
+from setuptools import setup, find_packages
 
 PWD = path.abspath(path.dirname(__file__))
 
@@ -41,7 +41,7 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     keywords='google cloud storage nearline coldline archive',
-    packages=['gcs_inventory_loader'],  # TODO: more specific
+    packages=find_packages(), exclude=["tests"],
     python_requires='>=3.5, <4',
     install_requires=[
         'google-cloud-bigquery',
