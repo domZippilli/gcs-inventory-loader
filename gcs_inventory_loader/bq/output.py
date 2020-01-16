@@ -15,6 +15,7 @@
 Module containing BigQuery code for this program.
 """
 
+import json
 import logging
 
 from threading import Lock
@@ -41,6 +42,7 @@ class BigQueryOutput():
         self.batch_size = int(
             self.config.get('BIGQUERY', 'BATCH_WRITE_SIZE', fallback=100))
         self.insert_count = 0
+        self.insert_bytes = 0
         if create_table:
             table.initialize()
 
@@ -75,8 +77,10 @@ class BigQueryOutput():
             None
         """
         if self.rows:
-            LOG.debug("Flushing %s rows to %s.", len(self.rows),
-                      self.tablename)
+            if LOG.level <= logging.DEBUG:
+                sending_bytes = sum([len(json.dumps(x)) for x in self.rows])
+                LOG.debug("Flushing %s rows to %s, %s bytes.", len(self.rows),
+                          self.tablename, sending_bytes)
             client = get_bq_client()
             try:
                 insert_errors = client.insert_rows_json(
