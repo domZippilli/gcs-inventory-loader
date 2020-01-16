@@ -114,7 +114,7 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
         page {Page} -- The Page object from the listing.
         stats {dict} -- A dictionary of bucket_name (str): blob_count (int)
     """
-    catchup_output = BigQueryOutput(
+    output = BigQueryOutput(
         get_table(TableDefinitions.INVENTORY_SHORT,
                   config.get("BIGQUERY", "INVENTORY_TABLE")), False)
     blob_count = 0
@@ -125,10 +125,10 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
         metadata = blob._properties
         if "metadata" in metadata:  # this field shows up sometimes and isn't needed.
             del metadata["metadata"]
-        catchup_output.put(metadata)
+        output.put(metadata)
 
     if blob_count:
-        catchup_output.flush()
+        output.flush()
         stats[bucket] += blob_count
         LOG.info("%s blob records written for bucket %s.", stats[bucket],
                 bucket.name)
