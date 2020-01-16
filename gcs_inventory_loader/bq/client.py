@@ -25,42 +25,30 @@ from gcs_inventory_loader.config import get_config
 LOG = logging.getLogger(__name__)
 
 
-class BQClientPool():
+class SingleBQClient():
     """
-    A round-robin BQ client pool.
+    A cached single BQ client.
     """
-
-    def __init__(self, size=1):
-        self.clients = []
-        self.pool_size = size
-        self.next_up = 0
-        self.lock = Lock()
+    def __init__(self):
+        self.client = None
 
     def get_client(self) -> bigquery.client:
-        """Get a client from the pool. Automatically makes new ones until
-        the pool is full. Threadsafe.
+        """Get a client.
 
         Returns:
             storage.client -- A configured BQ client.
         """
-        config = get_config()
-        self.lock.acquire()
-        if len(self.clients) < self.pool_size:
+        if not self.client:
             LOG.debug("Making new BQ client.")
-            self.clients.append(
-                bigquery.Client(
-                    project=config.get('BIGQUERY',
-                                       'JOB_PROJECT',
-                                       fallback=config.get('GCP', 'PROJECT'))))
-        client = self.clients[self.next_up]
-        self.next_up += 1
-        if self.next_up >= self.pool_size - 1:
-            self.next_up = 0
-        self.lock.release()
-        return client
+            config = get_config()
+            self.client = bigquery.Client(
+                project=config.get('BIGQUERY',
+                                   'JOB_PROJECT',
+                                   fallback=config.get('GCP', 'PROJECT')))
+        return self.client
 
 
-CLIENTS = BQClientPool()
+CLIENTS = SingleBQClient()
 
 
 def get_bq_client() -> bigquery.client:

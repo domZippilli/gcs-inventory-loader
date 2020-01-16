@@ -33,11 +33,9 @@ class BigQueryOutput():
     """
     A queue-like output stream to a BigQuery table.
     """
-
     def __init__(self, table: Table, create_table: bool = True):
         self.config = get_config()
         self.lock = Lock()
-        self.client = get_bq_client()
         self.rows = list()
         self.tablename = table.get_fully_qualified_name()
         self.batch_size = int(
@@ -62,10 +60,9 @@ class BigQueryOutput():
             None
         """
         self.rows.append(row)
-        self.lock.acquire()
-        if len(self.rows) >= self.batch_size:
+        if len(self.rows) >= self.batch_size and self.lock.acquire(False):
             self.flush()
-        self.lock.release()
+            self.lock.release()
 
     def flush(self) -> None:
         """
@@ -77,22 +74,24 @@ class BigQueryOutput():
         Returns:
             None
         """
-        LOG.debug("Flushing %s rows to %s.", len(self.rows), self.tablename)
-        try:
-            insert_errors = self.client.insert_rows_json(
-                self.tablename, self.rows)
-            if insert_errors:
-                LOG.error("Insert errors! %s",
-                          [x for x in flatten(insert_errors)])
-        except BadRequest as error:
-            if not error.message.endswith("No rows present in the request."):
-                LOG.error("Insert error! %s", error.message)
-                raise error
-            # intentionally do nothing, as in some cases we will send an
-            # empty request.
-        finally:
-            self.insert_count += len(self.rows)
-            self.rows = list()
+        if self.rows:
+            LOG.debug("Flushing %s rows to %s.", len(self.rows),
+                      self.tablename)
+            client = get_bq_client()
+            try:
+                insert_errors = client.insert_rows_json(
+                    self.tablename, self.rows)
+                if insert_errors:
+                    LOG.error("Insert errors! %s",
+                              [x for x in flatten(insert_errors)])
+            except BadRequest as error:
+                if not error.message.endswith(
+                        "No rows present in the request."):
+                    LOG.error("Insert error! %s", error.message)
+                    raise error
+            finally:
+                self.insert_count += len(self.rows)
+                self.rows = list()
 
     def stats(self) -> str:
         """
