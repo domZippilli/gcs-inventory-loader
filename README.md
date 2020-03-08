@@ -7,7 +7,7 @@ It can be very useful to have an inventory of your GCS objects and their metadat
 
 This utility will help you bulk load an object listing to stdout, or directly into BigQuery. It doesn't help with keeping your database incrementally up-to-date, though that is easily achieved with either [Audit Logging](https://cloud.google.com/storage/docs/audit-logs) or [PubSub Notifications](https://cloud.google.com/storage/docs/pubsub-notifications).
 
-The implementation here takes the approach of listing buckets and sending each page to a worker in a thread pool for processing and streaming into BigQuery. Throughput rates of 15s per 100,000 objects have been achieved with moderately sized (32 vCPU) virtual machines. This works out to 2 minutes and 30 seconds per million objects.
+The implementation here takes the approach of listing buckets and sending each page to a worker in a thread pool for processing and streaming into BigQuery. Throughput rates of 15s per 100,000 objects have been achieved with moderately sized (32 vCPU) virtual machines. This works out to 2 minutes and 30 seconds per million objects. Note that this throughput is _per process_ -- simply shard the bucket namespace across multiple projects to increase this throughput.
 
 ## Installation
 
