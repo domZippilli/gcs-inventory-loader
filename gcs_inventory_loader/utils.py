@@ -16,6 +16,7 @@ Utility functions not specific to any submodule.
 """
 
 import logging
+import sys
 from configparser import ConfigParser
 from functools import wraps
 from typing import Callable
@@ -65,7 +66,7 @@ def set_program_log_level(command_line_arg, config: ConfigParser) -> None:
         else:
             print("Invalid log level from command line: {}".format(candidate))
     program_root_logger.setLevel(level)
-    print("Log level is {}, set by {}".format(level, set_by))
+    print("Log level is {}, set by {}".format(level, set_by), file=sys.stderr)
 
 
 

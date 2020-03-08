@@ -16,12 +16,15 @@
 Google Cloud Storage smart archiver main entry point.
 """
 import logging
+import sys
 import warnings
+
 import click
 
+from gcs_inventory_loader.cli.cat import cat_command
+from gcs_inventory_loader.cli.load import load_command
 from gcs_inventory_loader.config import config_to_string, set_config
 from gcs_inventory_loader.utils import set_program_log_level
-from gcs_inventory_loader.cli.load import load_command
 
 warnings.filterwarnings(
     "ignore", "Your application has authenticated using end user credentials")
@@ -57,7 +60,8 @@ def init(config_file: str = "./default.cfg", log_level: str = None) -> None:
         log_level {str} -- Desired log level. (default: {None})
     """
     config = set_config(config_file)
-    print("Configuration parsed: \n{}".format(config_to_string(config)))
+    print("Configuration parsed: \n{}".format(config_to_string(config)),
+          file=sys.stderr)
     set_program_log_level(log_level, config)
 
 
@@ -85,6 +89,29 @@ def load(context: object, buckets: [str] = None, prefix: str = None) -> None:
     """
     init(**context.obj)
     return load_command(buckets, prefix)
+
+
+@main.command()
+@click.option(
+    '-p',
+    '--prefix',
+    required=False,
+    help=
+    "A prefix to restrict the bucket listing(s) by. This is useful if you have"
+    "a very large bucket and want to shard the listing work.",
+    default=None)
+@click.argument('buckets', nargs=-1, required=False, default=None)
+@click.pass_context
+def cat(context: object, buckets: [str] = None, prefix: str = None) -> None:
+    """
+    Write delimited JSON with all objects in your bucket(s) to stdout.
+
+    Optionally, you can provide a list of buckets (without gs://) to limit the
+    scope. By default, all buckets in the configured project will be processed
+    into the table.
+    """
+    init(**context.obj)
+    return cat_command(buckets, prefix)
 
 
 if __name__ == "__main__":
