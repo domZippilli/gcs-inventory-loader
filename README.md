@@ -1,4 +1,5 @@
 # gcs-inventory-loader
+
 Load your GCS bucket inventory into BigQuery fast with this tool.
 
 ## Introduction
@@ -20,7 +21,7 @@ First, configure the config file. You will find a `./default.cfg` file in the ro
 
 Now, you are ready to run the command. You can get general help by just running `gcs_inventory`.
 
-```
+``` shell
 $ gcs_inventory
 Usage: gcs_inventory [OPTIONS] COMMAND [ARGS]...
 ```
@@ -29,17 +30,17 @@ Usage: gcs_inventory [OPTIONS] COMMAND [ARGS]...
 
 If you've configured the config file correctly, you should be able to get your bucket inventory loaded with a simple command:
 
-```
+``` shell
 gcs_inventory load
 ```
 
 Note that by default, this will load an inventory of all objects for _all buckets_ in your project. To restrict this further, you can use the bucket list argument and/or the filter option:
 
-```
+``` shell
 gcs_inventory load bucket1 bucket2
 ```
 
-```
+``` shell
 gcs_inventory load bucket1 -p stuffICareAbout/
 ```
 
@@ -47,22 +48,24 @@ gcs_inventory load bucket1 -p stuffICareAbout/
 
 You can also output the records in newline-delimited JSON for use with another database, or for bulk loading into BigQuery via GCS. For example:
 
-```
+``` shell
 gcs_inventory cat > inventory.ldjson
 ```
 
 You can combine this command with gsutil's ability to read from stdin for a stream directly into GCS:
 
-```
+``` shell
 gcs_inventory cat | gsutil cp - gs://mybucket/inventory.ldjson
 ```
 
-# Important Disclaimer
+## Important Disclaimer
 
 This code is written by a Googler, but this project is not supported by Google in any way. As the `LICENSE` file says, this work is offered to you on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for determining the appropriateness of using or redistributing the Work and assume any risks associated with Your exercise of permissions under this License.
 
-# License
+## License
+
 Apache 2.0 - See [the LICENSE](/LICENSE) for more information.
 
-# Copyright
-Copyright 2019 Google LLC.
+## Copyright
+
+Copyright 2020 Google LLC.
