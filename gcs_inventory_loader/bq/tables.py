@@ -116,25 +116,26 @@ class TableDefinitions(Enum):
     INVENTORY_SHORT = {
         "schema":
             """
-                kind STRING,
-                id STRING,
-                selfLink STRING,
-                mediaLink STRING,
-                name STRING,
                 bucket STRING,
-                contentType STRING,
-                contentLanguage STRING,
-                generation INT64,
-                metageneration INT64,
-                storageClass STRING,
-                size INT64,
-                md5Hash STRING,
-                crc32c STRING,
                 componentCount INT64,
+                contentLanguage STRING,
+                contentType STRING,
+                crc32c STRING,
                 etag STRING,
+                generation INT64,
+                id STRING,
+                kind STRING,
+                md5Hash STRING,
+                mediaLink STRING,
+                metadata ARRAY<STRUCT<key STRING, value STRING>>,
+                metageneration INT64,
+                name STRING,
+                selfLink STRING,
+                size INT64,
+                storageClass STRING,
                 timeCreated TIMESTAMP,
-                updated TIMESTAMP,
-                timeStorageClassUpdated TIMESTAMP
+                timeStorageClassUpdated TIMESTAMP,
+                updated TIMESTAMP
             """
     }
 

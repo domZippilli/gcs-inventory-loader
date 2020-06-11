@@ -113,10 +113,10 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
     for blob in page:
         blob_count += 1
         # pylint: disable=protected-access
-        metadata = blob._properties
-        if "metadata" in metadata:  # this field shows up sometimes and isn't needed.
-            del metadata["metadata"]
-        print(metadata)
+        blob_metadata = blob._properties
+        if "metadata" in blob_metadata:
+            blob_metadata["metadata"] = [{"key": k, "value": v} for k, v in blob_metadata["metadata"].items()]
+        print(blob_metadata)
 
     if blob_count:
         stats[bucket] += blob_count

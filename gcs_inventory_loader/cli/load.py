@@ -122,13 +122,16 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
     for blob in page:
         blob_count += 1
         # pylint: disable=protected-access
-        metadata = blob._properties
-        if "metadata" in metadata:  # this field shows up sometimes and isn't needed.
-            del metadata["metadata"]
-        output.put(metadata)
+        blob_metadata = blob._properties
+        if "metadata" in blob_metadata:
+            blob_metadata["metadata"] = [{"key": k, "value": v} for k, v in blob_metadata["metadata"].items()]
+        LOG.debug("Outputting blob record {}".format(blob_metadata))
+        output.put(blob_metadata)
 
-    if blob_count:
+    try:
         output.flush()
-        stats[bucket] += blob_count
-        LOG.info("%s blob records written for bucket %s.", stats[bucket],
-                bucket.name)
+    except:
+        LOG.exception("Error flushing rows to BigQuery!")
+    stats[bucket] += blob_count
+    LOG.info("%s blob records written for bucket %s.", stats[bucket],
+            bucket.name)
