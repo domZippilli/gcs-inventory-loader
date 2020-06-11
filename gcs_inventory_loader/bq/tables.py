@@ -130,6 +130,7 @@ class TableDefinitions(Enum):
                 metadata ARRAY<STRUCT<key STRING, value STRING>>,
                 metageneration INT64,
                 name STRING,
+                retentionExpirationTime TIMESTAMP,
                 selfLink STRING,
                 size INT64,
                 storageClass STRING,
