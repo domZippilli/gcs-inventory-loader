@@ -6,7 +6,7 @@ Load your GCS bucket inventory into BigQuery fast with this tool.
 
 It can be very useful to have an inventory of your GCS objects and their metadata, particularly in a powerful database like BigQuery. The GCS listing API supports filtering by prefixes, but more complex queries can't be done via API. Using a database, you can find out lots of information about the data you have in GCS, such as finding very large objects, very old or stale objects, etc.
 
-This utility will help you bulk load an object listing to stdout, or directly into BigQuery. It doesn't help with keeping your database incrementally up-to-date, though that is easily achieved with either [Audit Logging](https://cloud.google.com/storage/docs/audit-logs) or [PubSub Notifications](https://cloud.google.com/storage/docs/pubsub-notifications).
+This utility will help you bulk load an object listing to stdout, or directly into BigQuery. It can also help you keep your inventory up-to-date with the listen command.
 
 The implementation here takes the approach of listing buckets and sending each page to a worker in a thread pool for processing and streaming into BigQuery. Throughput rates of 15s per 100,000 objects have been achieved with moderately sized (32 vCPU) virtual machines. This works out to 2 minutes and 30 seconds per million objects. Note that this throughput is _per process_ -- simply shard the bucket namespace across multiple projects to increase this throughput.
 
@@ -68,7 +68,7 @@ configuration file and then simply run this command:
 gcs_inventory listen
 ```
 
-You can rely upon the message retention of PubSub subscriptions to run this job on a scheduled basis to true-up your inventory.
+You can rely upon the message retention of PubSub subscriptions to run this job on a scheduled basis to true-up your inventory, or just keep this utility running 24/7. If you have a very high rate of change, it is safe to run multiple listeners.
 
 Note that deletes will be recorded by the addition of a timeDeleted value.
 
