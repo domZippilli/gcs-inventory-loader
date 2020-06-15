@@ -58,6 +58,32 @@ You can combine this command with gsutil's ability to read from stdin for a stre
 gcs_inventory cat | gsutil cp - gs://mybucket/inventory.ldjson
 ```
 
+### Listening for changes
+
+You can use the listen command to pull [PubSub object change notifications](https://cloud.google.com/storage/docs/pubsub-notifications)
+from a subscription and stream them into your BigQuery table in order to keep it up to date. Configure the PUBSUB section of the
+configuration file and then simply run this command:
+
+```shell
+gcs_inventory listen
+```
+
+You can rely upon the message retention of PubSub subscriptions to run this job on a scheduled basis to true-up your inventory.
+
+Note that deletes will be recorded by the addition of a timeDeleted value.
+
+To set up PubSub notifications for a given bucket, use this gcloud command:
+
+```shell
+gsutil notification create -t [TOPIC_NAME] -f json gs://[BUCKET_NAME]
+```
+
+[See here](https://cloud.google.com/storage/docs/reporting-changes) for more info.
+
+## Known Issues
+
+- The listen and load commands may fail and lose messages on a first run if the target table is not already created. This is because table creation in BigQuery is eventually consistent, and the code to create the table doesn't quite account for that yet. In the case of the load command, you can simply retry; in the case of the listen command, *you may lose some messages*. You can avoid this by either running the load command successfully (with >0 rows) first, or simply running the listen command and exiting before it processes any messages and then waiting a minute.
+
 ## Important Disclaimer
 
 This code is written by a Googler, but this project is not supported by Google in any way. As the `LICENSE` file says, this work is offered to you on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for determining the appropriateness of using or redistributing the Work and assume any risks associated with Your exercise of permissions under this License.

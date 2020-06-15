@@ -22,6 +22,7 @@ import warnings
 import click
 
 from gcs_inventory_loader.cli.cat import cat_command
+from gcs_inventory_loader.cli.listen import listen_command
 from gcs_inventory_loader.cli.load import load_command
 from gcs_inventory_loader.config import config_to_string, set_config
 from gcs_inventory_loader.utils import set_program_log_level
@@ -113,6 +114,17 @@ def cat(context: object, buckets: [str] = None, prefix: str = None) -> None:
     init(**context.obj)
     return cat_command(buckets, prefix)
 
+
+@main.command()
+@click.pass_context
+def listen(context: object) -> None:
+    """
+    Listen to a PubSub subscription for object change events, and update the inventory table accordingly.
+
+    Configuration for the PubSub topic and subscription should be set in the config file.
+    """
+    init(**context.obj)
+    return listen_command()
 
 if __name__ == "__main__":
     main()

@@ -45,6 +45,7 @@ setup(
     install_requires=[
         'google-cloud-bigquery',
         'google-cloud-storage',
+        'google-cloud-pubsub',
         'click',
     ],
     entry_points={
