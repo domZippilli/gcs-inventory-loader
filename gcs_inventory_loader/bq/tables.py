@@ -113,7 +113,7 @@ class TableDefinitions(Enum):
 
     Where tables have schema = None, they are presumed to be read-only.
     """
-    INVENTORY_SHORT = {
+    INVENTORY = {
         "schema":
             """
                 bucket STRING,

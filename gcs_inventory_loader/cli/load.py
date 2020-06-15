@@ -46,7 +46,7 @@ def load_command(buckets: [str] = None, prefix: str = None) -> None:
     gcs = get_gcs_client()
     # Call this once to initialize.
     _ = BigQueryOutput(
-        get_table(TableDefinitions.INVENTORY_SHORT,
+        get_table(TableDefinitions.INVENTORY,
                   config.get("BIGQUERY", "INVENTORY_TABLE")))
 
     # if buckets is given, get each bucket object; otherwise, list all bucket
@@ -115,7 +115,7 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
         stats {dict} -- A dictionary of bucket_name (str): blob_count (int)
     """
     output = BigQueryOutput(
-        get_table(TableDefinitions.INVENTORY_SHORT,
+        get_table(TableDefinitions.INVENTORY,
                   config.get("BIGQUERY", "INVENTORY_TABLE")), False)
     blob_count = 0
 
