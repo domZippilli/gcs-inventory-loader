@@ -10,6 +10,16 @@ This utility will help you bulk load an object listing to stdout, or directly in
 
 The implementation here takes the approach of listing buckets and sending each page to a worker in a thread pool for processing and streaming into BigQuery. Throughput rates of 15s per 100,000 objects have been achieved with moderately sized (32 vCPU) virtual machines. This works out to 2 minutes and 30 seconds per million objects. Note that this throughput is _per process_ -- simply shard the bucket namespace across multiple projects to increase this throughput.
 
+## Costs
+
+Compute costs notwithstanding, the primary cost you'll incur for listing objects is Class A operations charges. Under most circumstances you'll get a listing with 1000 objects per page (exceptional circumstances might be... you just did a lot of deletes and the table is sparse). So cost is figured like so:
+
+`(number of objects listed) / 1000 / 10,000 * (rate per 10,000 class A ops)`
+
+For example, in a standard regional bucket, listing 100 million objects should cost about .5 USD:
+
+[`(100 million) / 1000 / 10,000 * $0.05 = $0.50`](https://www.wolframalpha.com/input/?i=%28100+million%29+%2F+1000+%2F+10%2C000+*+%240.05)
+
 ## Installation
 
   1) Download this repository and `cd` into it.
