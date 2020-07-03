@@ -132,6 +132,8 @@ def unpack_and_insert(output: BigQueryOutput, message: Message) -> None:
         # For deletes, use the publish time to approximate deleted time
         if event_type == "OBJECT_DELETE":
             object_info["timeDeleted"] = publish_time
+            if object_info.get("metadata"):
+                object_info["metadata"] = [{"key": k, "value": v} for k, v in object_info["metadata"].items()]
         
         if event_type == "OBJECT_METADATA_UPDATE":
             def generate_structs(arr):
