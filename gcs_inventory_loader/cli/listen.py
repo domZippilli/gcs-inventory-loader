@@ -30,6 +30,7 @@ from gcs_inventory_loader.bq.output import BigQueryOutput
 from gcs_inventory_loader.bq.tables import TableDefinitions, get_table
 from gcs_inventory_loader.config import get_config
 from gcs_inventory_loader.thread import BoundedThreadPoolExecutor
+from gcs_inventory_loader.bq.client import get_bq_client
 
 LOG = logging.getLogger(__name__)
 
@@ -105,6 +106,11 @@ def unpack_and_insert(output: BigQueryOutput, message: Message) -> None:
         output object per program.
         message (Message): The PubSub message.
     """
+    bq_client = get_bq_client()
+    config = get_config()
+    table = get_table(TableDefinitions.INVENTORY, config.get("BIGQUERY", "INVENTORY_TABLE"))
+    table_name = table.get_fully_qualified_name()
+
     try:
         LOG.debug("Message data: \n---DATA---\n{}\n---DATA---".format(
             message.data))
@@ -112,6 +118,9 @@ def unpack_and_insert(output: BigQueryOutput, message: Message) -> None:
         # Decode and deserialize
         message_string = bytes.decode(message.data, "UTF-8")
         object_info = json.loads(message_string)
+
+        LOG.debug(message)
+        LOG.debug(object_info)
 
         # Get important attributes
         event_type = message.attributes['eventType']
@@ -123,9 +132,30 @@ def unpack_and_insert(output: BigQueryOutput, message: Message) -> None:
         # For deletes, use the publish time to approximate deleted time
         if event_type == "OBJECT_DELETE":
             object_info["timeDeleted"] = publish_time
+        
+        if event_type == "OBJECT_METADATA_UPDATE":
+            def generate_structs(arr):
+                res = '['
+                for s in arr:
+                    res+="STRUCT(\"{key}\" as key, \"{value}\" as value),".format(key=s['key'], value=s['value'])
+                res = res[:-1]
+                res+=']'
+                return res
 
-        # Enqueue for writing
-        output.put(object_info)
+            querytext = "UPDATE `{table_name}`\
+                SET metadata = {new_metadata}\
+                WHERE id = '{id}'".format(
+                    table_name=table_name,
+                    new_metadata=generate_structs([{"key": k, "value": v} for k, v in object_info["metadata"].items()]),
+                    id=object_info["id"]
+                )
+            LOG.info("Running query: \n%s", querytext)
+            query_job = bq_client.query(querytext)
+            LOG.info(query_job.result())
+        else:
+            # Enqueue for writing
+            output.put(object_info)
+
         message.ack()
 
     except:
