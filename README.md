@@ -1,6 +1,6 @@
 # gcs-inventory-loader
 
-Load your GCS bucket inventory into BigQuery fast with this tool.
+Load your GCS bucket inventory into BigQuery (or stdout) fast with this tool.
 
 ## Introduction
 
