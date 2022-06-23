@@ -116,6 +116,7 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
         blob_metadata = blob._properties
         if "metadata" in blob_metadata:
             blob_metadata["metadata"] = [{"key": k, "value": v} for k, v in blob_metadata["metadata"].items()]
+        blob_metadata["acl"] = list(blob.acl)
         print(blob_metadata)
 
     if blob_count:
