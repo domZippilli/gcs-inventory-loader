@@ -129,7 +129,7 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
                 "key": k,
                 "value": v
             } for k, v in blob_metadata["metadata"].items()]
-        blob_metadata["acl"] = list(blob.acl)
+        # blob_metadata["acl"] = list(blob.acl)  # TODO: this breaks on UBLA
         LOG.debug("Outputting blob record {}".format(blob_metadata))
         output.put(blob_metadata)
 
