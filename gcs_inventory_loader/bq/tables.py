@@ -126,6 +126,7 @@ class TableDefinitions(Enum):
                 contentType STRING,
                 crc32c STRING,
                 customerEncryption STRUCT<encryptionAlgorithm STRING, keySha256 STRING>,
+                customTime STRING,
                 etag STRING,
                 eventBasedHold BOOL,
                 generation INT64,
