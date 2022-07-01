@@ -18,6 +18,7 @@ Google Cloud Storage smart archiver main entry point.
 import logging
 import sys
 import warnings
+from typing import List
 
 import click
 
@@ -71,18 +72,19 @@ def init(config_file: str = "./default.cfg", log_level: str = None) -> None:
     '-p',
     '--prefix',
     required=False,
-    help=
-    "A prefix to restrict the bucket listing(s) by. This is useful if you have"
-    "a very large bucket and want to shard the listing work.",
+    help="A prefix to restrict the bucket listing(s) by. This is useful if you"
+    " have a very large bucket and want to shard the listing work.",
     default=None)
 @click.argument('buckets', nargs=-1, required=False, default=None)
 @click.pass_context
-def load(context: object, buckets: [str] = None, prefix: str = None) -> None:
+def load(context: object,
+         buckets: List[str] = None,
+         prefix: str = None) -> None:
     """
-    Build the inventory table with all objects in your bucket(s). The table will
-    be named whatever you set to the INVENTORY_TABLE value in the configuration
-    file. The table will be created if not found. If it is found, records will
-    be appended.
+    Build the inventory table with all objects in your bucket(s). The table
+    will be named whatever you set to the INVENTORY_TABLE value in the
+    configuration file. The table will be created if not found. If it is found,
+    records will be appended.
 
     Optionally, you can provide a list of buckets (without gs://) to limit the
     scope. By default, all buckets in the configured project will be processed
@@ -97,13 +99,14 @@ def load(context: object, buckets: [str] = None, prefix: str = None) -> None:
     '-p',
     '--prefix',
     required=False,
-    help=
-    "A prefix to restrict the bucket listing(s) by. This is useful if you have"
-    "a very large bucket and want to shard the listing work.",
+    help="A prefix to restrict the bucket listing(s) by. This is useful if you"
+    " have a very large bucket and want to shard the listing work.",
     default=None)
 @click.argument('buckets', nargs=-1, required=False, default=None)
 @click.pass_context
-def cat(context: object, buckets: [str] = None, prefix: str = None) -> None:
+def cat(context: object,
+        buckets: List[str] = None,
+        prefix: str = None) -> None:
     """
     Write delimited JSON with all objects in your bucket(s) to stdout.
 
@@ -119,12 +122,15 @@ def cat(context: object, buckets: [str] = None, prefix: str = None) -> None:
 @click.pass_context
 def listen(context: object) -> None:
     """
-    Listen to a PubSub subscription for object change events, and update the inventory table accordingly.
+    Listen to a PubSub subscription for object change events, and update the
+    inventory table accordingly.
 
-    Configuration for the PubSub topic and subscription should be set in the config file.
+    Configuration for the PubSub topic and subscription should be set in the
+    config file.
     """
     init(**context.obj)
     return listen_command()
+
 
 if __name__ == "__main__":
     main()

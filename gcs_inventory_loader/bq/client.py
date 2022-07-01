@@ -16,7 +16,6 @@ Module containing BigQuery code for this program.
 """
 
 import logging
-from threading import Lock
 
 from google.cloud import bigquery
 
@@ -29,6 +28,7 @@ class SingleBQClient():
     """
     A cached single BQ client.
     """
+
     def __init__(self):
         self.client = None
 

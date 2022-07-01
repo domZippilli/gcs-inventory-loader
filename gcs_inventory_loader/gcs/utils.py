@@ -18,12 +18,12 @@ Module containing some GCS utility functions.
 # This is a mapping of storage classes understood by this program to storage
 # classes which may be encountered when describing blobs. In general,
 # the blob API will use more verbose names, or a handful of legacy names.
-# See https://googleapis.dev/python/storage/latest/blobs.html#google.cloud.storage.blob.Blob.storage_class
+# See https://googleapis.dev/python/storage/latest/blobs.html#google.cloud.storage.blob.Blob.storage_class  # noqa: E501
 # for more information about the storage class names used by
 # Blob.storage_class.
-# The storage class names used by this program are also included in the mapping,
-# so this can be used with storage class descriptions from other sources, like
-# the catchup table.
+# The storage class names used by this program are also included in the
+# mapping, so this can be used with storage class descriptions from other
+# sources, like the catchup table.
 STORAGE_CLASS_MAPPING = {
     'STANDARD': [
         'STANDARD', 'STANDARD_STORAGE_CLASS', 'REGIONAL_LEGACY_STORAGE_CLASS',
@@ -38,11 +38,13 @@ STORAGE_CLASS_MAPPING = {
 def check_redundant_rewrite(destination_class: str,
                             origination_class: str) -> bool:
     """Check whether a requested rewrite is redundant.
-    
+
     Arguments:
-        destination_class {str} -- The destination storage class, set in the program configuration by the user.
-        origination_class {str} -- The origination storage class, given by a blob description.
-    
+        destination_class {str} -- The destination storage class, set in the
+            program configuration by the user.
+        origination_class {str} -- The origination storage class, given by a
+            blob description.
+
     Returns:
         bool -- True if the write is redundant.
     """

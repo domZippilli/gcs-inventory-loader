@@ -16,12 +16,8 @@ Get and validate configuration for the smart archiver from
 arguments and config files.
 """
 
-# TODO: Validation, set_config for testing
-
 import io
 from configparser import ConfigParser
-
-from gcs_inventory_loader.utils import memoize
 
 
 class ConfigParserHolder():
@@ -79,7 +75,6 @@ def config_to_string(config: ConfigParser) -> str:
     return config_status.read()
 
 
-@memoize
 def check_configured(config: ConfigParser) -> None:
     """Check that none of the values equal the sentinel "CONFIGURE_ME".
 

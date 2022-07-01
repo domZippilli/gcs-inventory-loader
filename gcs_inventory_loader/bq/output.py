@@ -34,6 +34,7 @@ class BigQueryOutput():
     """
     A queue-like output stream to a BigQuery table.
     """
+
     def __init__(self, table: Table, create_table: bool = True):
         self.config = get_config()
         self.lock = Lock()
@@ -114,7 +115,8 @@ def flatten(iterable, iter_types=(list, tuple)) -> Iterable:
     Flattens nested iterables into a flat iterable.
 
     Arguments:
-        iterable {iterable} -- An iterable, which may contain iterable elements.
+        iterable {iterable} -- An iterable, which may contain iterable
+        elements.
 
     Keyword Arguments:
         iter_types {tuple} -- The types to recognize as iterables and recurse
