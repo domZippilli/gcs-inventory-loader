@@ -1,0 +1,3 @@
+[flake8]
+per-file-ignores =
+    ./gcs_inventory_loader/bq/queries.py:E501

@@ -73,7 +73,9 @@ class Table:
             in the default BigQuery job timeout.
         """
         if not self.schema:
-            raise ValueError("No schema provided for table {}; writing is not supported.".format(self.short_name))
+            raise ValueError(
+                "No schema provided for table {}; writing is not supported.".
+                format(self.short_name))
 
         bq_client = get_bq_client()
 
@@ -115,7 +117,7 @@ class TableDefinitions(Enum):
     """
     INVENTORY = {
         "schema":
-            """
+        """
                 acl ARRAY<STRUCT<role STRING, entity STRING>>,
                 bucket STRING,
                 cacheControl STRING,
@@ -148,7 +150,7 @@ class TableDefinitions(Enum):
                 timeDeleted TIMESTAMP,
                 timeStorageClassUpdated TIMESTAMP,
                 updated TIMESTAMP
-            """
+            """  # noqa: E501
     }
 
 

@@ -17,8 +17,8 @@ Implementation of "catchup" command.
 
 import logging
 from configparser import ConfigParser
-from random import randint
 from time import sleep
+from typing import List
 
 from google.cloud.storage import Bucket, Client
 from google.api_core.page_iterator import Page
@@ -31,7 +31,8 @@ from gcs_inventory_loader.thread import BoundedThreadPoolExecutor
 
 LOG = logging.getLogger(__name__)
 
-def load_command(buckets: [str] = None, prefix: str = None) -> None:
+
+def load_command(buckets: List[str] = None, prefix: str = None) -> None:
     """Implementation of the load command.
 
     This function dispatches each bucket listed into an executor thread for
@@ -69,9 +70,10 @@ def load_command(buckets: [str] = None, prefix: str = None) -> None:
             buckets_listed += 1
             executor.submit(bucket_lister, config, gcs, bucket, prefix,
                             buckets_listed, total_buckets, bucket_blob_counts)
-    
+
     LOG.info("Stats: \n\t%s", bucket_blob_counts)
-    LOG.info("Total rows: \n\t%s", sum([v for _, v in bucket_blob_counts.items()]))
+    LOG.info("Total rows: \n\t%s",
+             sum([v for _, v in bucket_blob_counts.items()]))
 
 
 def bucket_lister(config: ConfigParser, gcs: Client, bucket: Bucket,
@@ -101,7 +103,6 @@ def bucket_lister(config: ConfigParser, gcs: Client, bucket: Bucket,
         for page in blobs.pages:
             sub_executor.submit(page_outputter, config, bucket, page, stats)
             sleep(0.02)  # small offset to avoid thundering herd
-            
 
 
 def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
@@ -124,15 +125,18 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
         # pylint: disable=protected-access
         blob_metadata = blob._properties
         if "metadata" in blob_metadata:
-            blob_metadata["metadata"] = [{"key": k, "value": v} for k, v in blob_metadata["metadata"].items()]
+            blob_metadata["metadata"] = [{
+                "key": k,
+                "value": v
+            } for k, v in blob_metadata["metadata"].items()]
         blob_metadata["acl"] = list(blob.acl)
         LOG.debug("Outputting blob record {}".format(blob_metadata))
         output.put(blob_metadata)
 
     try:
         output.flush()
-    except:
+    except Exception:
         LOG.exception("Error flushing rows to BigQuery!")
     stats[bucket] += blob_count
     LOG.info("%s blob records written for bucket %s.", stats[bucket],
-            bucket.name)
+             bucket.name)

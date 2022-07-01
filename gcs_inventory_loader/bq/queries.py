@@ -16,7 +16,7 @@ Definitions of BigQuery queries used by this program.
 """
 import logging
 
-from google.cloud.bigquery.job import QueryJob, QueryJobConfig, WriteDisposition
+from google.cloud.bigquery.job import QueryJob, QueryJobConfig, WriteDisposition  # noqa: E501
 
 from gcs_inventory_loader.bq.client import get_bq_client
 from gcs_inventory_loader.bq.tables import get_table, TableDefinitions, Table
@@ -25,10 +25,11 @@ from gcs_inventory_loader.config import get_config
 LOG = logging.getLogger(__name__)
 
 
-def run_query_job(querytext: str,
-                  temp_table: str = None,
-                  query_job_config: QueryJobConfig = QueryJobConfig()
-                 ) -> QueryJob:
+def run_query_job(
+    querytext: str,
+    temp_table: str = None,
+    query_job_config: QueryJobConfig = QueryJobConfig()
+) -> QueryJob:
     """
     Set up and run a query job.
 
@@ -91,8 +92,8 @@ def _calculate_day_partitions() -> int:
         int -- The sum of cold threshold days and days between runs.
     """
     config = get_config()
-    return config.getint('RULES', 'COLD_THRESHOLD_DAYS') + \
-           config.getint('RULES', 'DAYS_BETWEEN_RUNS')
+    return config.getint('RULES', 'COLD_THRESHOLD_DAYS') + config.getint(
+        'RULES', 'DAYS_BETWEEN_RUNS')
 
 
 def _get_cold_threshold_days() -> int:
@@ -172,7 +173,7 @@ def compose_access_query() -> str:
     # recent access (coldness) as well as the count of accesses within a
     # specified period (hotness).
     aggregated_access_records = """
-    SELECT 
+    SELECT
         resourceName,
         MAX(timestamp) AS lastAccess,
         COUNTIF(TIMESTAMP_DIFF(CURRENT_TIMESTAMP(), timestamp, DAY) <= {0}) AS recent_access_count
@@ -186,18 +187,19 @@ def compose_access_query() -> str:
     querytext = """
     WITH most_recent_moves AS ({0}), raw_access_records AS ({1}), aggregated_access_records AS ({2})
 
-    SELECT 
-        access_records.resourceName, 
-        most_recent_moves.storageClass, 
-        access_records.lastAccess, 
-        access_records.recent_access_count 
+    SELECT
+        access_records.resourceName,
+        most_recent_moves.storageClass,
+        access_records.lastAccess,
+        access_records.recent_access_count
     FROM aggregated_access_records as access_records
 
     LEFT JOIN most_recent_moves ON access_records.resourceName = most_recent_moves.resourceName
 
     LEFT JOIN `{3}` as excluded ON access_records.resourceName = excluded.resourceName
     WHERE excluded.resourceName IS NULL
-    """.format(most_recent_moves, raw_access_records, aggregated_access_records,
+    """.format(most_recent_moves, raw_access_records,
+               aggregated_access_records,
                excluded_objects.get_fully_qualified_name())
 
     return querytext

@@ -17,8 +17,8 @@ Implementation of "catchup" command.
 
 import logging
 from configparser import ConfigParser
-from random import randint
 from time import sleep
+from typing import List
 
 from google.cloud.storage import Bucket, Client
 from google.api_core.page_iterator import Page
@@ -29,7 +29,7 @@ from gcs_inventory_loader.thread import BoundedThreadPoolExecutor
 LOG = logging.getLogger(__name__)
 
 
-def cat_command(buckets: [str] = None, prefix: str = None) -> None:
+def cat_command(buckets: List[str] = None, prefix: str = None) -> None:
     """Implementation of the cat command.
 
     This function dispatches each bucket listed into an executor thread for
@@ -115,7 +115,10 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
         # pylint: disable=protected-access
         blob_metadata = blob._properties
         if "metadata" in blob_metadata:
-            blob_metadata["metadata"] = [{"key": k, "value": v} for k, v in blob_metadata["metadata"].items()]
+            blob_metadata["metadata"] = [{
+                "key": k,
+                "value": v
+            } for k, v in blob_metadata["metadata"].items()]
         blob_metadata["acl"] = list(blob.acl)
         print(blob_metadata)
 

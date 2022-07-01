@@ -19,7 +19,6 @@ import atexit
 from concurrent.futures import TimeoutError
 import json
 import logging
-from configparser import ConfigParser
 
 from google.api_core.exceptions import AlreadyExists
 from google.cloud import pubsub_v1 as pubsub
@@ -29,7 +28,6 @@ from google.cloud.pubsub_v1.subscriber.futures import StreamingPullFuture
 from gcs_inventory_loader.bq.output import BigQueryOutput
 from gcs_inventory_loader.bq.tables import TableDefinitions, get_table
 from gcs_inventory_loader.config import get_config
-from gcs_inventory_loader.thread import BoundedThreadPoolExecutor
 from gcs_inventory_loader.bq.client import get_bq_client
 
 LOG = logging.getLogger(__name__)
@@ -64,8 +62,8 @@ def listen_command() -> None:
                   config.get("BIGQUERY", "INVENTORY_TABLE")), False)
 
     def handle(message):
-        """Callback for handling new PubSub messages. Effectively, this just "partially applies" 
-        the output stream above to unpack_and_insert.
+        """Callback for handling new PubSub messages. Effectively, this just
+        "partially applies" the output stream above to unpack_and_insert.
         """
         unpack_and_insert(output, message)
 
@@ -92,7 +90,7 @@ def listen_command() -> None:
                 LOG.debug("No messages in {} seconds, flushing rows (if any).".
                           format(timeout))
                 output.flush()
-            except:
+            except Exception:
                 LOG.info("Quitting...")
                 break
 
@@ -102,13 +100,14 @@ def unpack_and_insert(output: BigQueryOutput, message: Message) -> None:
     a BigQueryOutput.
 
     Args:
-        output (BigQueryOutput): The output to use. In most cases, you will want to use a single
-        output object per program.
+        output (BigQueryOutput): The output to use. In most cases, you will
+        want to use a single output object per program.
         message (Message): The PubSub message.
     """
     bq_client = get_bq_client()
     config = get_config()
-    table = get_table(TableDefinitions.INVENTORY, config.get("BIGQUERY", "INVENTORY_TABLE"))
+    table = get_table(TableDefinitions.INVENTORY,
+                      config.get("BIGQUERY", "INVENTORY_TABLE"))
     table_name = table.get_fully_qualified_name()
 
     try:
@@ -133,24 +132,31 @@ def unpack_and_insert(output: BigQueryOutput, message: Message) -> None:
         if event_type == "OBJECT_DELETE":
             object_info["timeDeleted"] = publish_time
             if object_info.get("metadata"):
-                object_info["metadata"] = [{"key": k, "value": v} for k, v in object_info["metadata"].items()]
-        
+                object_info["metadata"] = [{
+                    "key": k,
+                    "value": v
+                } for k, v in object_info["metadata"].items()]
+
         if event_type == "OBJECT_METADATA_UPDATE":
+
             def generate_structs(arr):
                 res = '['
                 for s in arr:
-                    res+="STRUCT(\"{key}\" as key, \"{value}\" as value),".format(key=s['key'], value=s['value'])
+                    res += "STRUCT(\"{key}\" as key, \"{value}\" as value),".format(  # noqa: E501
+                        key=s['key'], value=s['value'])
                 res = res[:-1]
-                res+=']'
+                res += ']'
                 return res
 
             querytext = "UPDATE `{table_name}`\
                 SET metadata = {new_metadata}\
                 WHERE id = '{id}'".format(
-                    table_name=table_name,
-                    new_metadata=generate_structs([{"key": k, "value": v} for k, v in object_info["metadata"].items()]),
-                    id=object_info["id"]
-                )
+                table_name=table_name,
+                new_metadata=generate_structs([{
+                    "key": k,
+                    "value": v
+                } for k, v in object_info["metadata"].items()]),
+                id=object_info["id"])
             LOG.info("Running query: \n%s", querytext)
             query_job = bq_client.query(querytext)
             LOG.info(query_job.result())
@@ -160,9 +166,10 @@ def unpack_and_insert(output: BigQueryOutput, message: Message) -> None:
 
         message.ack()
 
-    except:
+    except Exception:
         LOG.exception(
             "Error processing message! ---DATA---\n{}\n---DATA---".format(
                 message.data))
-        # TODO: A retry / DLQ policy would be useful, if not already present by default.
+        # TODO: A retry / DLQ policy would be useful, if not already present
+        # by default.
         message.nack()

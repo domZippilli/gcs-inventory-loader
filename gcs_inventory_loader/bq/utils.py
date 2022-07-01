@@ -17,6 +17,7 @@ Various utility functions related to BigQuery queries and results.
 
 from typing import Tuple
 
+
 def get_bucket_and_object(resource_name: str) -> Tuple[str, str]:
     """
     Given an audit log resourceName, parse out the bucket name and object

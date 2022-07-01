@@ -18,8 +18,6 @@ Utility functions not specific to any submodule.
 import logging
 import sys
 from configparser import ConfigParser
-from functools import wraps
-from typing import Callable
 
 from gcs_inventory_loader.constants import PROGRAM_ROOT_LOGGER_NAME
 
@@ -67,30 +65,3 @@ def set_program_log_level(command_line_arg, config: ConfigParser) -> None:
             print("Invalid log level from command line: {}".format(candidate))
     program_root_logger.setLevel(level)
     print("Log level is {}, set by {}".format(level, set_by), file=sys.stderr)
-
-
-
-def memoize(func: Callable) -> Callable:
-    """Decorator to memoize a function.
-
-    Arguments:
-        func {func} -- The function to memoize.
-
-    Returns:
-        func -- A function with results cached for specific arguments.
-    """
-    # Define the dictionary for memoized responses
-    memos = func.memos = {}
-
-    @wraps(func)
-    def memoized(*args, **kwargs):
-        # devise a key based on string representation of arguments given
-        # in this function call
-        call = str(args) + str(kwargs)
-        # if the result isn't stored, call the function and store it
-        if call not in memos:
-            memos[call] = func(*args, **kwargs)
-        # return the stored value
-        return memos[call]
-
-    return memoized

@@ -29,6 +29,7 @@ class GCSClientPool():
     """
     A round-robin GCS client pool.
     """
+
     def __init__(self, size=32):
         self.clients = []
         self.pool_size = size
