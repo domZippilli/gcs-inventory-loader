@@ -116,6 +116,7 @@ class TableDefinitions(Enum):
     INVENTORY = {
         "schema":
             """
+                acl ARRAY<STRUCT<role STRING, entity STRING>>,
                 bucket STRING,
                 cacheControl STRING,
                 componentCount INT64,
