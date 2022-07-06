@@ -94,12 +94,21 @@ def bucket_lister(config: ConfigParser, gcs: Client, bucket: Bucket,
              total_buckets)
     stats[bucket] = 0
 
+    # Check config to determine whether to retrieve ACL for each blob
+    get_acl=config.getboolean("GCP","ACLS",fallback=False)
+    projection=''
+
+    if get_acl is True:
+        projection = 'full'
+    else:
+        projection = 'noAcl'
+
     # Use remaining configured workers, or at least 2, for this part
     workers = max(config.getint('RUNTIME', 'WORKERS') - 2, 2)
     size = int(config.getint('RUNTIME', 'WORK_QUEUE_SIZE') * .75)
     with BoundedThreadPoolExecutor(max_workers=workers,
                                    queue_size=size) as sub_executor:
-        blobs = gcs.list_blobs(bucket, prefix=prefix)
+        blobs = gcs.list_blobs(bucket, prefix=prefix, projection=projection)
         for page in blobs.pages:
             sub_executor.submit(page_outputter, config, bucket, page, stats)
             sleep(0.02)  # small offset to avoid thundering herd
@@ -131,8 +140,6 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
                 "key": k,
                 "value": v
             } for k, v in blob_metadata["metadata"].items()]
-        if get_acl is True and bucket.iam_configuration.bucket_policy_only_enabled is False:
-            blob_metadata["acl"] = list(blob.acl)
         LOG.debug("Outputting blob record {}".format(blob_metadata))
         output.put(blob_metadata)
 
