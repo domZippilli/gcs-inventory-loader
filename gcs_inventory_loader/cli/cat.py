@@ -109,6 +109,9 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
         stats {dict} -- A dictionary of bucket_name (str): blob_count (int)
     """
     blob_count = 0
+
+    get_acl=config.getboolean("GCP","ACLS",fallback=False)
+
     for blob in page:
         blob_count += 1
         # pylint: disable=protected-access
@@ -118,7 +121,8 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
                 "key": k,
                 "value": v
             } for k, v in blob_metadata["metadata"].items()]
-        # blob_metadata["acl"] = list(blob.acl)  # TODO: this breaks on UBLA
+        if get_acl is True and bucket.iam_configuration.bucket_policy_only_enabled is False:
+            blob_metadata["acl"] = list(blob.acl)
         print(blob_metadata)
 
     if blob_count:
