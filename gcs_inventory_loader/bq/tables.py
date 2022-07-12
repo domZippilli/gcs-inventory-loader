@@ -118,7 +118,7 @@ class TableDefinitions(Enum):
     INVENTORY = {
         "schema":
         """
-                acl ARRAY<STRUCT<role STRING, entity STRING>>,
+                acl ARRAY<STRUCT<kind STRING, object STRING, generation INT64, id STRING, selfLink STRING, bucket STRING, entity STRING, role STRING, email STRING, etag STRING, projectTeam STRUCT<projectNumber STRING, team STRING>>>,
                 bucket STRING,
                 cacheControl STRING,
                 componentCount INT64,
@@ -152,7 +152,6 @@ class TableDefinitions(Enum):
                 updated TIMESTAMP
             """  # noqa: E501
     }
-
 
 def get_table(table: TableDefinitions, name: str = None) -> Table:
     """    Get a Table object using one of the TableDefinitions enum
