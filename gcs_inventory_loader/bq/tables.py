@@ -153,6 +153,7 @@ class TableDefinitions(Enum):
             """  # noqa: E501
     }
 
+
 def get_table(table: TableDefinitions, name: str = None) -> Table:
     """    Get a Table object using one of the TableDefinitions enum
     definitions.

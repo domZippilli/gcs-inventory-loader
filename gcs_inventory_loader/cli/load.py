@@ -95,8 +95,8 @@ def bucket_lister(config: ConfigParser, gcs: Client, bucket: Bucket,
     stats[bucket] = 0
 
     # Check config to determine whether to retrieve ACL for each blob
-    get_acl=config.getboolean("GCP","ACLS",fallback=False)
-    projection=''
+    get_acl = config.getboolean("GCP", "ACLS", fallback=False)
+    projection = ''
 
     if get_acl is True:
         projection = 'full'
@@ -128,8 +128,6 @@ def page_outputter(config: ConfigParser, bucket: Bucket, page: Page,
         get_table(TableDefinitions.INVENTORY,
                   config.get("BIGQUERY", "INVENTORY_TABLE")), False)
     blob_count = 0
-
-    get_acl=config.getboolean("GCP","ACLS",fallback=False)
 
     for blob in page:
         blob_count += 1
