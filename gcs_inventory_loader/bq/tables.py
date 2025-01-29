@@ -148,6 +148,7 @@ class TableDefinitions(Enum):
                 temporaryHold BOOL,
                 timeCreated TIMESTAMP,
                 timeDeleted TIMESTAMP,
+                timeFinalized TIMESTAMP,
                 timeStorageClassUpdated TIMESTAMP,
                 updated TIMESTAMP
             """  # noqa: E501
