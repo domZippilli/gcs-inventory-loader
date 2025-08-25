@@ -18,6 +18,7 @@ arguments and config files.
 
 import io
 from configparser import ConfigParser
+from pathlib import Path
 
 
 class ConfigParserHolder():
@@ -40,7 +41,13 @@ def set_config(config_file: str) -> ConfigParser:
 
     Returns:
         ConfigParser -- The stored parsed configuration.
+
+    Raises:
+        FileNotFoundError -- If the config file does not exist.
     """
+    if not Path(config_file).is_file():
+        raise FileNotFoundError("Configuration file '{}' was not found.".
+                                format(config_file))
 
     config = ConfigParser()
     config.read(config_file)
